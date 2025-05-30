@@ -1,6 +1,7 @@
-from flask import Flask
-from dotenv import load_dotenv  # Импортируем dotenv
 import os
+
+from dotenv import load_dotenv
+from flask import Flask
 
 load_dotenv()
 app = Flask(__name__)
