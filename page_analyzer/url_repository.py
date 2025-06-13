@@ -1,6 +1,7 @@
+from datetime import datetime
+
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from datetime import datetime
 
 
 class UrlRepository:
@@ -28,14 +29,16 @@ class UrlRepository:
                 if 'id' not in url_data:
                     # New url
                     cur.execute(
-                        "INSERT INTO urls (name, created_at) VALUES (%s, %s) RETURNING id",
+                        "INSERT INTO urls (name, created_at) "
+                        "VALUES (%s, %s) RETURNING id",
                         (url_data['name'], datetime.now())
                     )
                     url_data['id'] = cur.fetchone()[0]
                 else:
                     # Existing url
                     cur.execute(
-                        "UPDATE urls SET name = %s, created_at = %s WHERE id = %s",
+                        "UPDATE urls SET name = %s, "
+                        "created_at = %s WHERE id = %s",
                         (url_data['name'], datetime.now(), url_data['id'])
                     )
             conn.commit()

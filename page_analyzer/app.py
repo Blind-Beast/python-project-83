@@ -1,19 +1,19 @@
-import psycopg2
 import os
-import validators
+from urllib.parse import urlparse, urlunparse
 
+import validators
 from dotenv import load_dotenv
 from flask import (
-    flash,
     Flask,
+    flash,
     get_flashed_messages,
     redirect,
     render_template,
     request,
-    url_for
+    url_for,
 )
+
 from page_analyzer.url_repository import UrlRepository
-from urllib.parse import urlparse, urlunparse
 
 load_dotenv()
 app = Flask(__name__)
@@ -68,7 +68,12 @@ def normalize_url(url):
     parsed_url = urlparse(url)
     normalized_scheme = parsed_url.scheme.lower()
     normalized_netloc = parsed_url.netloc.lower()
-    normalized_path = "/".join(segment.strip("/") for segment in parsed_url.path.split("/"))
-    normalized_parsed_url = parsed_url._replace(scheme=normalized_scheme, netloc=normalized_netloc, path=normalized_path)
+    normalized_path = "/".join(segment.strip("/") 
+    for segment in parsed_url.path.split("/"))
+    normalized_parsed_url = parsed_url._replace(
+        scheme=normalized_scheme,
+        netloc=normalized_netloc,
+        path=normalized_path
+    )
     normalized_url = urlunparse(normalized_parsed_url)
     return normalized_url
