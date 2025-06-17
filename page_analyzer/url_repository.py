@@ -26,7 +26,8 @@ class UrlRepository:
     def get_by_term(self, search_term=""):
         with self.get_connection() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                cur.execute("SELECT * FROM urls WHERE name = %s", (search_term,))
+                cur.execute("SELECT * FROM urls WHERE name = %s", 
+                (search_term,))
                 return cur.fetchone()
 
     def save(self, url_data):

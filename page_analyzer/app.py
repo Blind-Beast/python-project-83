@@ -26,7 +26,7 @@ repo = UrlRepository(app.config['DATABASE_URL'])
 @app.route("/")
 def index():
     error = ''
-    return render_template('index.html', error = error)
+    return render_template('index.html', error=error)
 
 
 @app.route('/urls')
@@ -52,10 +52,10 @@ def urls_post():
     row = repo.get_by_term(url_data['name'])
     if row:
         flash('Страница уже существует', 'warning')
-        return redirect(url_for("urls_show", id = row['id']))
+        return redirect(url_for("urls_show", id=row['id']))
     new_id = repo.save(url_data)
     flash('Страница успешно добавлена', 'success')
-    return redirect(url_for("urls_show", id = new_id), code=302)
+    return redirect(url_for("urls_show", id=new_id), code=302)
 
 
 @app.route('/urls/<id>')
