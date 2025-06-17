@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -23,24 +23,21 @@ class UrlRepository:
                 cur.execute("SELECT * FROM urls WHERE id = %s", (id,))
                 return cur.fetchone()
 
+    def get_by_term(self, search_term=""):
+        with self.get_connection() as conn:
+            with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                cur.execute("SELECT * FROM urls WHERE name = %s", (search_term,))
+                return cur.fetchone()
+
     def save(self, url_data):
         with self.get_connection() as conn:
             with conn.cursor() as cur:
-                if 'id' not in url_data:
-                    # New url
-                    cur.execute(
-                        "INSERT INTO urls (name, created_at) "
-                        "VALUES (%s, %s) RETURNING id",
-                        (url_data['name'], datetime.now())
-                    )
-                    url_data['id'] = cur.fetchone()[0]
-                else:
-                    # Existing url
-                    cur.execute(
-                        "UPDATE urls SET name = %s, "
-                        "created_at = %s WHERE id = %s",
-                        (url_data['name'], datetime.now(), url_data['id'])
-                    )
+                cur.execute(
+                    "INSERT INTO urls (name, created_at) "
+                    "VALUES (%s, %s) RETURNING id",
+                    (url_data['name'], date.today())
+                )
+                url_data['id'] = cur.fetchone()[0]
             conn.commit()
         return url_data['id']
 

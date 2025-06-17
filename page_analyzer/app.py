@@ -25,17 +25,16 @@ repo = UrlRepository(app.config['DATABASE_URL'])
 
 @app.route("/")
 def index():
-    return render_template('index.html')
+    error = ''
+    return render_template('index.html', error = error)
 
 
-@app.route('/urls/')
+@app.route('/urls')
 def urls_get():
-    messages = get_flashed_messages(with_categories=True)
     urls = repo.get_content()
     return render_template(
         'urls/index.html',
-        urls=urls,
-        messages=messages
+        urls=urls
     )
 
 
@@ -43,23 +42,38 @@ def urls_get():
 def urls_post():
     url_data = request.form.to_dict()
     norm_url = normalize_url(url_data['name'])
-    url_data['name'] = norm_url
     error = validate(norm_url)
     if error:
         return render_template(
             'index.html',
             error=error,
         ), 422
-    repo.save(url_data)
+    url_data['name'] = norm_url
+    row = repo.get_by_term(url_data['name'])
+    if row:
+        flash('Страница уже существует', 'warning')
+        return redirect(url_for("urls_show", id = row['id']))
+    new_id = repo.save(url_data)
     flash('Страница успешно добавлена', 'success')
-    return redirect(url_for('urls_get'), code=302)
+    return redirect(url_for("urls_show", id = new_id), code=302)
+
+
+@app.route('/urls/<id>')
+def urls_show(id):
+    messages = get_flashed_messages(with_categories=True)
+    url = repo.find(id)
+    return render_template(
+        'urls/show.html',
+        url=url,
+        messages=messages
+    )
 
 
 def validate(url):
     error = ''
-    if not url['name']:
-        error = "Заполните поле"
-    elif not validators.url(url['name']):
+    if len(url) > 255:
+        error = "URL превышает 255 символлов"
+    elif not validators.url(url):
         error = "Некорректный URL"
     return error
 
@@ -68,12 +82,12 @@ def normalize_url(url):
     parsed_url = urlparse(url)
     normalized_scheme = parsed_url.scheme.lower()
     normalized_netloc = parsed_url.netloc.lower()
-    normalized_path = "/".join(segment.strip("/") 
-    for segment in parsed_url.path.split("/"))
     normalized_parsed_url = parsed_url._replace(
         scheme=normalized_scheme,
         netloc=normalized_netloc,
-        path=normalized_path
+        path='/',
+        query="",
+        fragment=""
     )
     normalized_url = urlunparse(normalized_parsed_url)
     return normalized_url
