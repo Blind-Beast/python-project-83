@@ -14,6 +14,7 @@ from flask import (
 )
 
 from page_analyzer.url_repository import UrlRepository
+from page_analyzer.url_check_repository import UrlCheckRepository
 
 load_dotenv()
 app = Flask(__name__)
@@ -21,6 +22,7 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['DATABASE_URL'] = os.getenv('DATABASE_URL')
 
 repo = UrlRepository(app.config['DATABASE_URL'])
+repo_checks = UrlCheckRepository(app.config['DATABASE_URL'])
 
 
 @app.route("/")
@@ -56,6 +58,15 @@ def urls_post():
     new_id = repo.save(url_data)
     flash('Страница успешно добавлена', 'success')
     return redirect(url_for("urls_show", id=new_id), code=302)
+
+
+@app.post('/urls/<id>/checks')
+def urls_checks_post(id):
+    #url_check_data = request.form.to_dict()
+    repo_checks.save(id)
+    flash('Страница успешно проверена', 'success')
+    url_checks = repo_checks.get_content()
+    return redirect(url_for("urls_show", id=id, url_checks=url_checks), code=302)
 
 
 @app.route('/urls/<id>')
