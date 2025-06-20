@@ -13,8 +13,8 @@ from flask import (
     url_for,
 )
 
-from page_analyzer.url_repository import UrlRepository
 from page_analyzer.url_check_repository import UrlCheckRepository
+from page_analyzer.url_repository import UrlRepository
 
 load_dotenv()
 app = Flask(__name__)
@@ -62,11 +62,11 @@ def urls_post():
 
 @app.post('/urls/<id>/checks')
 def urls_checks_post(id):
-    #url_check_data = request.form.to_dict()
     repo_checks.save(id)
     flash('Страница успешно проверена', 'success')
     url_checks = repo_checks.get_content()
-    return redirect(url_for("urls_show", id=id, url_checks=url_checks), code=302)
+    return redirect(url_for("urls_show", id=id, url_checks=url_checks), 
+                    code=302)
 
 
 @app.route('/urls/<id>')

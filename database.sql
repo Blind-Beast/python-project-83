@@ -10,9 +10,9 @@ CREATE TABLE IF NOT EXISTS urls (
 CREATE TABLE IF NOT EXISTS url_checks (
     id SERIAL PRIMARY KEY,
     url_id bigint REFERENCES urls(id) NOT NULL,
-    status_code integer NOT NULL,
+    status_code integer,
     h1 integer,
-    title VARCHAR(255) NOT NULL,
-    description VARCHAR(255) NOT NULL,
+    title VARCHAR(255),
+    description VARCHAR(255),
     created_at TIMESTAMP NOT NULL
 );
