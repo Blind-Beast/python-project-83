@@ -14,7 +14,11 @@ class UrlRepository:
     def get_content(self):
         with self.get_connection() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                cur.execute("SELECT * FROM urls")
+                cur.execute("SELECT * FROM urls " 
+                "LEFT JOIN (SELECT url_id, MAX(created_at) AS latest_check " 
+                "FROM url_checks GROUP BY url_id) checks " 
+                "ON urls.id = checks.url_id " 
+                "ORDER BY urls.id DESC")
                 return cur.fetchall()
 
     def find(self, id):

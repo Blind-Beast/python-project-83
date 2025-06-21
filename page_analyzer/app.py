@@ -64,18 +64,18 @@ def urls_post():
 def urls_checks_post(id):
     repo_checks.save(id)
     flash('Страница успешно проверена', 'success')
-    url_checks = repo_checks.get_content()
-    return redirect(url_for("urls_show", id=id, url_checks=url_checks), 
-                    code=302)
+    return redirect(url_for("urls_show", id=id), code=302)
 
 
 @app.route('/urls/<id>')
 def urls_show(id):
     messages = get_flashed_messages(with_categories=True)
     url = repo.find(id)
+    url_checks = repo_checks.get_content(id)
     return render_template(
         'urls/show.html',
         url=url,
+        url_checks=url_checks,
         messages=messages
     )
 

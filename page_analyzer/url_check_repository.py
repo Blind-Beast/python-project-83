@@ -11,10 +11,11 @@ class UrlCheckRepository:
     def get_connection(self):
         return psycopg2.connect(self.db_url)
 
-    def get_content(self):
+    def get_content(self, url_id):
         with self.get_connection() as conn:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                cur.execute("SELECT * FROM url_checks")
+                cur.execute("SELECT * FROM url_checks WHERE url_id = %s " 
+                "ORDER BY id DESC", (url_id,))
                 return cur.fetchall()
 
     def find(self, id):
