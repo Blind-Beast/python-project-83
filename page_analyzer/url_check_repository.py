@@ -31,13 +31,17 @@ class UrlCheckRepository:
                 (search_term,))
                 return cur.fetchone()
 
-    def save(self, url_id, response):
+    def save(self, url_id, check_result):
         with self.get_connection() as conn:
             with conn.cursor() as cur:
                 cur.execute(
-                    "INSERT INTO url_checks (url_id, status_code, created_at) "
-                    "VALUES (%s, %s, %s) RETURNING id",
-                    (url_id, response.status_code, date.today())
+                    "INSERT INTO url_checks ("
+                    "url_id, status_code, h1, created_at) "
+                    "VALUES (%s, %s, %s, %s) RETURNING id",
+                    (url_id, 
+                    check_result['status_code'],
+                    check_result['h1'],
+                    date.today())
                 )
                 url_check_id = cur.fetchone()[0]
             conn.commit()

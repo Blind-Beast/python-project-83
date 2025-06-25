@@ -3,6 +3,7 @@ from urllib.parse import urlparse, urlunparse
 
 import requests
 import validators
+from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from flask import (
     Flask,
@@ -70,7 +71,8 @@ def urls_checks_post(id):
     except requests.exceptions.RequestException:
         flash('Произошла ошибка при проверке', 'warning')
         return redirect(url_for("urls_show", id=id))
-    repo_checks.save(id, response)
+    check_result = check(response)
+    repo_checks.save(id, check_result)
     flash('Страница успешно проверена', 'success')
     return redirect(url_for("urls_show", id=id), code=302)
 
@@ -110,3 +112,14 @@ def normalize_url(url):
     )
     normalized_url = urlunparse(normalized_parsed_url)
     return normalized_url
+
+
+def check(response):
+    result = {}
+    result["status_code"] = response.status_code
+    bs = BeautifulSoup(response.text, "html.parser")
+    if bs.find('h1'):
+        result["h1"] = bs.find('h1').text
+    else:
+        result["h1"] = ''
+    return result
