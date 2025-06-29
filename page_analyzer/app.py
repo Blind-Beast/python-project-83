@@ -55,7 +55,7 @@ def urls_post():
     url_data['name'] = norm_url
     row = repo.get_by_term(url_data['name'])
     if row:
-        flash('Страница уже существует', 'warning')
+        flash('Страница уже существует', 'info')
         return redirect(url_for("urls_show", id=row['id']))
     new_id = repo.save(url_data)
     flash('Страница успешно добавлена', 'success')
@@ -65,11 +65,11 @@ def urls_post():
 @app.post('/urls/<id>/checks')
 def urls_checks_post(id):
     url = repo.find(id)
-    response = requests.get(url['name'])
     try:
+        response = requests.get(url['name'])
         response.raise_for_status()
     except requests.exceptions.RequestException:
-        flash('Произошла ошибка при проверке', 'warning')
+        flash('Произошла ошибка при проверке', 'danger')
         return redirect(url_for("urls_show", id=id))
     check_result = check(response)
     repo_checks.save(id, check_result)
@@ -117,9 +117,21 @@ def normalize_url(url):
 def check(response):
     result = {}
     result["status_code"] = response.status_code
-    bs = BeautifulSoup(response.text, "html.parser")
-    if bs.find('h1'):
-        result["h1"] = bs.find('h1').text
+    html_content = response.text
+    soup = BeautifulSoup(html_content, "html.parser")
+    title = soup.find("title")
+    if title:
+        result["title"] = title.string
+    else:
+        result["title"] = ''
+    h1 = soup.find("h1")
+    if h1:
+        result["h1"] = h1.string
     else:
         result["h1"] = ''
+    description = soup.css.select('meta[name="description"]')
+    if description:
+        result["description"] = description[0]["content"]
+    else:
+        result["description"] = ''
     return result

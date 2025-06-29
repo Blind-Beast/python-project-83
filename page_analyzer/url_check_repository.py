@@ -36,11 +36,13 @@ class UrlCheckRepository:
             with conn.cursor() as cur:
                 cur.execute(
                     "INSERT INTO url_checks ("
-                    "url_id, status_code, h1, created_at) "
-                    "VALUES (%s, %s, %s, %s) RETURNING id",
+                    "url_id, status_code, h1, title, description, created_at) "
+                    "VALUES (%s, %s, %s, %s, %s, %s) RETURNING id",
                     (url_id, 
                     check_result['status_code'],
                     check_result['h1'],
+                    check_result['title'],
+                    check_result['description'],
                     date.today())
                 )
                 url_check_id = cur.fetchone()[0]
