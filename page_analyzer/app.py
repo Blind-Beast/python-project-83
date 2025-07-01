@@ -44,20 +44,19 @@ def urls_get():
 
 @app.post('/urls')
 def urls_post():
-    url_data = request.form.to_dict()
-    norm_url = normalize_url(url_data['name'])
+    url_data = request.form['url']
+    norm_url = normalize_url(url_data)
     error = validate(norm_url)
     if error:
         return render_template(
             'index.html',
             error=error,
         ), 422
-    url_data['name'] = norm_url
-    row = repo.get_by_term(url_data['name'])
+    row = repo.get_by_term(norm_url)
     if row:
         flash('Страница уже существует', 'info')
         return redirect(url_for("urls_show", id=row['id']))
-    new_id = repo.save(url_data)
+    new_id = repo.save(norm_url)
     flash('Страница успешно добавлена', 'success')
     return redirect(url_for("urls_show", id=new_id), code=302)
 
@@ -106,7 +105,7 @@ def normalize_url(url):
     normalized_parsed_url = parsed_url._replace(
         scheme=normalized_scheme,
         netloc=normalized_netloc,
-        path='/',
+        path='',
         query="",
         fragment=""
     )
@@ -129,7 +128,7 @@ def check(response):
         result["h1"] = h1.string
     else:
         result["h1"] = ''
-    description = soup.css.select('meta[name="description"]')
+    description = soup.select('meta[name="description"]')
     if description:
         result["description"] = description[0]["content"]
     else:

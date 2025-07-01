@@ -35,17 +35,17 @@ class UrlRepository:
                 (search_term,))
                 return cur.fetchone()
 
-    def save(self, url_data):
+    def save(self, url):
         with self.get_connection() as conn:
             with conn.cursor() as cur:
                 cur.execute(
                     "INSERT INTO urls (name, created_at) "
                     "VALUES (%s, %s) RETURNING id",
-                    (url_data['name'], date.today())
+                    (url, date.today())
                 )
-                url_data['id'] = cur.fetchone()[0]
+                id = cur.fetchone()[0]
             conn.commit()
-        return url_data['id']
+        return id
 
     def destroy(self, id):
         with self.get_connection() as conn:
